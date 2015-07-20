@@ -1,0 +1,260 @@
+<?xml version="1.0"?>
+<objects>
+<!-- ('', 'zport', 'dmd', 'Devices', 'rrdTemplates', 'JuniperCard') -->
+<object id='/zport/dmd/Devices/rrdTemplates/JuniperCard' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
+<property id='zendoc' type='string'>
+Monitor operational status of cards in Juniper chassis
+</property>
+<property type="text" id="description" mode="w" >
+Monitor operational status of cards in Juniper chassis
+</property>
+<property type="string" id="targetPythonClass" mode="w" >
+ZenPacks.community.JuniperCard
+</property>
+<tomanycont id='datasources'>
+<object id='jnxFruOfflineReason' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+SNMP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Cmd/Fail
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="int" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="oid" mode="w" >
+1.3.6.1.4.1.2636.3.1.15.1.10
+</property>
+<property type="boolean" id="usessh" mode="w" >
+False
+</property>
+<property type="string" id="parser" mode="w" >
+Auto
+</property>
+<tomanycont id='datapoints'>
+<object id='jnxFruOfflineReason' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+<property type="string" id="rrdmin" mode="w" >
+1
+</property>
+<property type="string" id="rrdmax" mode="w" >
+100
+</property>
+</object>
+</tomanycont>
+</object>
+<object id='jnxLEDState' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
+<property select_variable="sourcetypes" type="selection" id="sourcetype" mode="w" >
+SNMP
+</property>
+<property type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="eventClass" mode="w" >
+/Cmd/Fail
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property type="int" id="cycletime" mode="w" >
+300
+</property>
+<property type="string" id="oid" mode="w" >
+1.3.6.1.4.1.2636.3.1.10.1.8.3
+</property>
+<property type="boolean" id="usessh" mode="w" >
+False
+</property>
+<property type="string" id="parser" mode="w" >
+Auto
+</property>
+<tomanycont id='datapoints'>
+<object id='jnxLEDState' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
+GAUGE
+</property>
+<property type="boolean" id="isrow" mode="w" >
+True
+</property>
+</object>
+</tomanycont>
+</object>
+</tomanycont>
+<tomanycont id='thresholds'>
+<object id='Alarm Status' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="string" id="eventClass" mode="w" >
+/HW/JuniperCard
+</property>
+<property type="int" id="severity" mode="w" >
+4
+</property>
+<property label="DataPoints" type="lines" id="dsnames" mode="w" >
+['jnxLEDState_jnxLEDState']
+</property>
+<property label="Enabled" type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="maxval" mode="w" >
+2
+</property>
+<property type="int" id="escalateCount" mode="w" >
+0
+</property>
+</object>
+<object id='Hardware Offline' module='Products.ZenModel.MinMaxThreshold' class='MinMaxThreshold'>
+<property type="string" id="eventClass" mode="w" >
+/HW/JuniperCard
+</property>
+<property type="int" id="severity" mode="w" >
+3
+</property>
+<property label="DataPoints" type="lines" id="dsnames" mode="w" >
+['jnxFruOfflineReason_jnxFruOfflineReason']
+</property>
+<property label="Enabled" type="boolean" id="enabled" mode="w" >
+True
+</property>
+<property type="string" id="minval" mode="w" >
+2
+</property>
+<property type="string" id="maxval" mode="w" >
+2
+</property>
+<property type="int" id="escalateCount" mode="w" >
+0
+</property>
+</object>
+</tomanycont>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'HW', 'JuniperCard') -->
+<object id='/zport/dmd/Events/HW/JuniperCard' module='Products.ZenEvents.EventClass' class='EventClass'>
+<property type="text" id="transform" mode="w" >
+message = getattr(evt, 'message', 'message missing from original event')
+
+# get current value and use as an index to reasons[]
+import re
+m = re.search(r'(\d+\.?\d*)$', message)
+if m:
+    reason_index = int(float(m.group(0)))
+else:
+    reason_index = 0
+
+
+if message.startswith('threshold of Alarm Status exceeded: current value'):
+    # 5 (on-secondary) is not a concern.
+    if reason_index == 5:
+        evt._action = 'drop'
+
+    if reason_index &lt; 3 or reason_index &gt; 6:
+        reason = 0
+
+    reasons = [
+        'invalid alert, ignore',
+        'invalid alert, ignore',
+        'invalid alert, ignore',
+        'Warning alarm exists: marginally working',
+        'Failure alarm exists: component not working',
+        'On-line as active primary',
+        'Off-line alarm exists: component is not running',
+    ]
+    evt.summary = reasons[reason_index]
+
+elif message.startswith('threshold of Hardware Offline exceeded: current value '):
+    if reason_index &gt; 76 or reason_index &lt; 0:
+        reason_index = 1
+
+    reasons = [
+        'invalid alert, there is no error',
+        'Offline for an unknown reason',
+        'invalid alert, there is no error',
+        'Offline in an errored state',
+        'Offline with no power',
+        'Offline (configured to power off)',
+        'Offline (configured to hold in reset)',
+        'Offline (by cli command)',
+        'Offline (by button press)',
+        'Offline (restarted by cli command)',
+        'Offline (overtemperature shutdown)',
+        'Offline (master clock down)',
+        'Offline (single SFM mode change)',
+        'Offline (packet scheduling mode change)',
+        'Offline (physical removal)',
+        'Offline (restarting unresponsive board)',
+        'Offline (sonet out clock absent)',
+        'Offline (RDD power off)',
+        'Offline (major errors)',
+        'Offline (minor errors)',
+        'Offline (LCC hard restart)',
+        'Offline (LCC version mismatch)',
+        'Offline (power cycle)',
+        'Offline (reconnect)',
+        'Offline (overvoltage)',
+        'Offline (PFE version mismatch)',
+        'Offline (FEB redundancy cfg changed)',
+        'Offline (FPC is misconfigured)',
+        'Offline (FRU did not reconnect)',
+        'Offline (FWDD reset the fru)',
+        'Offline (FEB got switched)',
+        'Offline (FEB was offlined)',
+        'Offline (In Service Software Upgrade Error)',
+        'Offline (Chassis power rating exceeded)',
+        'Offline (Configured offline)',
+        'Offline (restarting request from a service)',
+        'Offline (SPU reset request)',
+        'Offline (SPU flowd down)',
+        'Offline (SPU SPI4 down)',
+        'Offline (SPU Watchdog timeout)',
+        'Offline (SPU kernel core dump)',
+        'Offline (FPGA SPI4 link down)',
+        'Offline (I3 SPI4 link down)',
+        'Offline (CPP disconnect)',
+        'Offline (CPU not boot)',
+        'Offline (SPU kernel core dump complete)',
+        'Offline (Rst on SPC SPU failure)',
+        'Offline (Soft Reset on SPC SPU failure)',
+        'Offline (HW authentication failure)',
+        'Offline (Reconnect FPC fail)',
+        'Offline (FPC app failed)',
+        'Offline (FPC kernel crash)',
+        'Offline (SPU flowd down, no core dump)',
+        'Offline (SPU flowd crash with incomplete core dump)',
+        'Offline (SPU flowd crash with complete core dump)',
+        'Offline (SPU idpd down, no core dump)',
+        'Offline (SPU idpd crash with incomplete core dump)',
+        'Offline (SPU idpd crash with complete core dump)',
+        'Offline (SPU kernel crash with incomplete core dump)',
+        'Offline (SPU idpd down)',
+        'Offline (PFE reset)',
+        'Offline (FPC not ready to reconnect)',
+        'Offline (FE - Fabric links down)',
+        'Offline (Fabric transitioned from up to down)',
+        'Offline (FPC offlined due to Anti Counterfeit Retry)',
+        'Offline (FPC offlined due to Chassis Cluster Disable)',
+        'Offline (SPU fips error)',
+        'Offline (FPC offlined due to Fabric down)',
+        'Offline (FEB config change)',
+        'Offline (Route localization role change)',
+        'Offline (FPC unsupported)',
+        'Offline (PSD version mismatch)',
+        'Offline (FRU Reset Threshold Exceeded)',
+        'Offline (PIC Bounce)',
+        'Offline (bad voltage)',
+        'Offline (FPC offlined due to Reduced Fabric Bandwidth)',
+        'Offline (FRU offlined due to software autoheal action)',
+    ]
+
+    evt.summary = reasons[reason_index]
+</property>
+</object>
+</objects>
