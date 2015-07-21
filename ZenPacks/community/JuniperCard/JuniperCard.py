@@ -27,6 +27,10 @@ class JuniperCard(Fan, ManagedEntity):
 
     portal_type = meta_type = 'JuniperCard'
 
+    slot = ''
+
+    _properties = ( {'id' : 'slot', 'type' : 'string', 'mode' : ''}, )
+
     factory_type_information = (
         {
             'id'             : 'JuniperCard',
