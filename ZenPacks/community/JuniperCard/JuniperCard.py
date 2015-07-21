@@ -5,8 +5,10 @@
 ###########################################################################
 
 __doc="""
-Subclass ExpansionCard so a monitoring template for card status
-can be applied.
+Subclass Fan instead of ExpansionCard because the JuniperPlugableOptics
+zenpack already uses ExpansionCard and there doesn't seem to be a way to
+have more than one class map to an ExpansionCard and have them both show
+up in the GUI
 """
 from Globals import DTMLFile
 from Globals import InitializeClass
@@ -15,12 +17,12 @@ from Products.ZenRelations.RelSchema import *
 from Products.ZenModel.ManagedEntity import ManagedEntity
 from Products.ZenModel.ZenossSecurity import ZEN_VIEW, ZEN_CHANGE_SETTINGS, ZEN_VIEW_HISTORY
 
-from Products.ZenModel.ExpansionCard import ExpansionCard
+from Products.ZenModel.Fan import Fan
 
 import logging
 log = logging.getLogger('JuniperCard')
 
-class JuniperCard(ExpansionCard, ManagedEntity):
+class JuniperCard(Fan, ManagedEntity):
     """Juniper Card object"""
 
     portal_type = meta_type = 'JuniperCard'

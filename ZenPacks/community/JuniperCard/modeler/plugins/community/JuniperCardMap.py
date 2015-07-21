@@ -21,7 +21,7 @@ class JuniperCardMap(SnmpPlugin):
     "Map Juniper cards to the python class for them"
 
     modname = "ZenPacks.community.JuniperCard.JuniperCard"
-    relname = "cards"
+    relname = "fans"
     compname = "hw"
 
     snmpGetTableMaps = ( GetTableMap('jnxContentsTable',
