@@ -63,7 +63,7 @@ ZC.JuniperCardPanel = Ext.extend(ZC.ComponentGridPanel, {
 });
 
 Ext.reg('JuniperCardPanel',ZC.JuniperCardPanel);
-ZC.registerName('JuniperCard', _t('Card'), _t('Cards'));
+ZC.registerName('JuniperCard', _t('Juniper Card'), _t('Juniper Cards'));
 
 })();
 
