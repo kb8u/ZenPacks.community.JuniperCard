@@ -27,6 +27,7 @@ ZC.JuniperCardPanel = Ext.extend(ZC.ComponentGridPanel, {
                 {name: 'serialNumber'},
                 {name: 'locking'},
                 {name: 'usesMonitorAttribute'},
+                {name: 'monitor'},
                 {name: 'monitored'}
             ],
             columns: [{
