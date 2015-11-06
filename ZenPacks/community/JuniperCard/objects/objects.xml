@@ -9,7 +9,7 @@ Monitor operational status of cards in Juniper chassis
 Monitor operational status of cards in Juniper chassis
 </property>
 <property type="string" id="targetPythonClass" mode="w" >
-ZenPacks.community.JuniperCard
+ZenPacks.community.JuniperCard.JuniperCard
 </property>
 <tomanycont id='datasources'>
 <object id='jnxFruOfflineReason' module='Products.ZenModel.BasicDataSource' class='BasicDataSource'>
